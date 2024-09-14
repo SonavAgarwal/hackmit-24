@@ -101,19 +101,39 @@ def create_model():
 
     model.save('/data/fire_risk_model.h5')
 
-
-@app.function(volumes={"/data": vol}, image=modal.Image.debian_slim().pip_install("keras==2.12.0", "tensorflow==2.12.0"))
+@app.function(volumes={"/data": vol}, image=modal.Image.debian_slim().pip_install("keras==2.12.0", "tensorflow==2.12.0", "Pillow", "numpy"))
 @modal.web_endpoint(method="POST")
 async def classify_image(request: Request):
-    try: 
-        form = await request.form()
-        print(form)  # Print the form data to see if the file is included
-        image_file = form.get("file")
-        print(image_file)  # Check if image_file is correctly assigned
+    from keras.models import load_model
+    from PIL import Image
+    import numpy as np
+    import io
 
-        return {"image": image_file.filename}
-    except Exception as e:
-        return {"error": str(e)}
+    # Get the form data
+    form = await request.form()
+    image_file = form.get("file")
+    
+    # Read the image file content asynchronously
+    image_bytes = await image_file.read()
+
+    # Convert the image bytes to an image object using PIL
+    img = Image.open(io.BytesIO(image_bytes))
+    
+    # Convert image to RGB if it has an alpha channel
+    if img.mode != 'RGB':
+        img = img.convert('RGB')
+    
+    img = img.resize((256, 256))  # Resize to match the model input size
+    img_array = np.array(img) / 255.0  # Normalize pixel values to [0, 1]
+    img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
+    
+    # Load the model
+    model = load_model('/data/fire_risk_model.h5')
+
+    # Predict
+    predictions = model.predict(img_array)
+    return {"predictions": predictions.tolist()}
+
 
 
 
