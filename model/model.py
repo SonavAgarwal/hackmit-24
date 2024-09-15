@@ -89,7 +89,7 @@ def train_model():
 @app.function(
     volumes={"/data": vol},
     image=modal.Image.debian_slim().pip_install(
-        "keras==2.12.0", "tensorflow==2.12.0", "Pillow", "numpy"
+        "keras==3.5.0", "tensorflow==2.12.0", "Pillow", "numpy"
     ),
 )
 @modal.web_endpoint(method="POST")

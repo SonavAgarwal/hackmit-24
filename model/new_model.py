@@ -7,8 +7,8 @@ vol = modal.Volume.from_name("data")
 @app.function(
     volumes={"/data": vol},
     image=modal.Image.debian_slim().pip_install(
-       "keras==2.12.0", 
-       "tensorflow==2.12.0",
+       "keras==3.5.0", 
+       "tensorflow==2.17.0",
         "Pillow",
         "numpy",
         "requests",
