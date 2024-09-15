@@ -12,10 +12,10 @@ def meters_per_long_degree(lat_center):
     return 111320 * np.cos(np.radians(lat_center))
 
 def distance(coord1, coord2):
-    # lon1, lat1 = coord1
-    # lon2, lat2 = coord2
-    lat1, lon1 = coord1
-    lat2, lon2 = coord2
+    lon1, lat1 = coord1
+    lon2, lat2 = coord2
+    # lat1, lon1 = coord1
+    # lat2, lon2 = coord2
     dx = (lon1 - lon2) * meters_per_long_degree((lat1 + lat2) / 2)
     dy = (lat1 - lat2) * METERS_PER_LAT_DEGREE
     return (dx, dy)
@@ -59,6 +59,7 @@ def scale_polygon(coords, buffer_in_pixels):
 
 def get_polygons_from_bounding_box(bounding_box):
     res = []
+    bounding_box = bounding_box[:-1] if bounding_box[0] == bounding_box[-1] else bounding_box
     polygon_coords = bounding_box_to_pixel_coords(bounding_box)
     res.append(polygon_coords)
     for zone in ZONES_IN_METERS:
@@ -70,7 +71,7 @@ def get_polygons_from_bounding_box(bounding_box):
 
 
 IMAGE_NAME = "50x50.png"
-bounding_box = [[-120.1060273,38.8073838],[-120.1059951,38.8072709],[-120.1058791,38.807291],[-120.1059113,38.8074039]]
+bounding_box = [[-120.1060273,38.8073838],[-120.1059951,38.8072709],[-120.1058791,38.807291],[-120.1059113,38.8074039],[-120.1060273,38.8073838]]
 
 polygons = get_polygons_from_bounding_box(bounding_box)
 
