@@ -117,10 +117,10 @@ async def get_risk_endpoint(request: Request):
         base64_image = get_base64_at(lat, lon, width, height)
         if base64_image:
             classification = classify_image(base64_image)
-            return classification
+            return base64_image, classification
         return None
 
     # Compute the risk
-    risk = get_risk(lat, lon, width, height)
+    base64_image, classification = get_risk(lat, lon, width, height)
 
-    return {"risk": risk}
+    return {"risk": classification, "image": base64_image}

@@ -1,12 +1,12 @@
 import numpy as np
 from PIL import Image, ImageDraw
-from shapely.geometry import Polygon
 
 RESOLUTION = 400
 IMAGE_WIDTH_IN_METERS = 50
 METERS_PER_PIXEL = IMAGE_WIDTH_IN_METERS / RESOLUTION
-METERS_PER_LAT_DEGREE = 181320 # 111320
+METERS_PER_LAT_DEGREE =  111320
 ZONES_IN_METERS = [5, 15, 100]
+MULTIPLIER = 1.35
 
 def meters_per_long_degree(lat_center):
     return 111320 * np.cos(np.radians(lat_center))
@@ -16,8 +16,8 @@ def distance(coord1, coord2):
     lon2, lat2 = coord2
     # lat1, lon1 = coord1
     # lat2, lon2 = coord2
-    dx = (lon2 - lon1) * meters_per_long_degree((lat1 + lat2) / 2)
-    dy = (lat2-lat1) * METERS_PER_LAT_DEGREE
+    dx = (lon2 - lon1) * meters_per_long_degree((lat1 + lat2) / 2) * MULTIPLIER
+    dy = (lat2-lat1) * METERS_PER_LAT_DEGREE * MULTIPLIER
     return (dx, dy)
 
 def bounding_box_to_pixel_coords(bounding_box):
@@ -77,6 +77,16 @@ def get_polygons_from_bounding_box(bounding_box):
     return res
 
 
+def create_masks(image, polygons):
+    masks = []
+    for polygon in polygons:
+        mask = Image.new('L', image.size, 1)
+        ImageDraw.Draw(mask).polygon(polygon, outline=1, fill=1)
+        masks.append(mask)
+        mask.save('mask.png')
+        mask.show()
+
+    return masks
 
 
 IMAGE_NAME = "50x50.png"
@@ -93,7 +103,7 @@ draw = ImageDraw.Draw(image)
 for polygon in polygons:   
     draw.polygon(polygon, outline='red', fill=None)  # Change 'red' to any color you want
 
-
+create_masks(image, polygons)
 
 # Save or display the result
 image.save('image_with_polygon.jpg')  # You can save the modified image
