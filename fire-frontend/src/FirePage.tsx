@@ -16,7 +16,8 @@ function parseScore(score: string) {
     const scores = score.split("y");
     scores.forEach((s) => {
         const [year, value] = s.split("s");
-        scoreMap[parseInt(year)] = parseFloat(value);
+        // MODIFYING SCORE TO BE 1 - SCORE
+        scoreMap[parseInt(year)] = 1 - parseFloat(value);
     });
     return scoreMap;
 }
@@ -47,10 +48,14 @@ const FirePage = () => {
     const score = searchParams.get("score") || "y2016s0.7";
     const scoreMap = parseScore(score);
     const recentScore = getOrderedScores(scoreMap)[0];
-    const email = searchParams.get("email") || "sophia.sharif@gmail.com";
-    const address =
-        searchParams.get("address") ||
-        "1234 Example Street, San Francisco, CA 94105";
+    const email = searchParams.get("email") || "anonymous";
+    const address = searchParams.get("address") || "Unknown Address";
+    const llm = searchParams.get("llm") || "";
+    console.log(llm);
+
+    // first line of llm is the assessment, the rest is the recommendation
+    const llmAssessment = llm.split("\n")[0];
+    const llmRecommendation = llm.split("\n").slice(1).join("\n");
 
     console.log(lat, lon, width, height, score, email);
 
@@ -79,13 +84,11 @@ const FirePage = () => {
         } else {
             return RiskCopy[0.75];
         }
-
-        return RiskCopy[0];
     }
 
     return (
-        <div className="flex h-screen w-screen flex-row">
-            <div className="flex h-full flex-1 flex-col gap-4 p-[6vh]">
+        <div className="flex h-screen w-screen flex-row items-start">
+            <div className="flex min-h-full flex-1 flex-col gap-4 p-[6vh]">
                 <h1 className="text-xl text-gray-400">For {email}</h1>
                 <h1 className="mt-4 text-4xl font-bold text-gray-900">
                     {/* {email} */}
@@ -140,6 +143,13 @@ const FirePage = () => {
                 </div>
 
                 <p className="text-lg text-gray-700">{getCopy(recentScore)}</p>
+
+                {llm && (
+                    <p className="text-lg text-gray-700">
+                        <strong>Assessment:</strong> {llmAssessment} <br />
+                        <strong>Recommendations:</strong> {llmRecommendation}
+                    </p>
+                )}
 
                 {/* Resources */}
                 <h2 className="mt-4 text-2xl font-bold text-gray-600">

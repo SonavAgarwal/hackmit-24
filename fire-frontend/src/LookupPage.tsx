@@ -1,37 +1,8 @@
-import chroma from "chroma-js";
 import { motion, useAnimationControls } from "framer-motion";
 import { useEffect, useState } from "react";
-import { FaCircleInfo, FaFire, FaHouseFire } from "react-icons/fa6";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 import LoadingIndicator from "./LoadingIndicator";
-
-const RiskCopy = {
-    0: "Your property is well maintained and does not pose a fire risk. Keep up the good work!",
-    0.25: "Your property low-risk and meets basic fire safety requirements. Consider additional precautions to reduce fire risk.",
-    0.5: "Your property is a moderate-risk for spreading fire and may require additional fire safety measures. Take steps to reduce fire risk and protect your home.",
-    0.75: "Your property has been identified as a potential fire code violation due to overgrown vegetation and insufficient defensible space around the home. These conditions increase the risk of fire spreading and do not comply with current fire safety regulations. Please address these issues by clearing brush and ensuring proper spacing between structures to avoid further action.",
-};
-
-function parseScore(score: string) {
-    // y2022s0.1y2020s0.2 and so on
-    const scoreMap: Record<string, number> = {};
-    const scores = score.split("y");
-    scores.forEach((s) => {
-        const [year, value] = s.split("s");
-        scoreMap[parseInt(year)] = parseFloat(value);
-    });
-    return scoreMap;
-}
-
-function getOrderedScores(scoreMap: Record<string, number>) {
-    return Object.keys(scoreMap)
-        .sort()
-        .map((year) => scoreMap[year]);
-}
-
-function roundToFivePlaces(num: number) {
-    return Math.round(num * 100000) / 100000;
-}
+import { createSearchParams, useNavigate } from "react-router-dom";
 
 const LookupPage = () => {
     const navigate = useNavigate();
@@ -63,15 +34,51 @@ const LookupPage = () => {
 
             // Fetch: "https://sophiasharif--abatement-get-risk-endpoint.modal.run/?lat=37.43112348844268&lon=-122.21332146865818&width=100&height=100&year=2016"
             const BASE_URL =
-                "https://sophiasharif--abatement-get-risk-endpoint.modal.run";
-            const url = `${BASE_URL}/?lat=${lat}&lon=${lon}&width=${size}&height=${size}&year=${year}`;
+                "https://sophiasharif--abatement-with-upload-get-risk-endpoint.modal.run";
+            const imageKey = uuidv4();
+            const url = `${BASE_URL}/?lat=${lat}&lon=${lon}&width=${size}&height=${size}&year=${year}&key=${imageKey}`;
 
             const response = await fetch(url);
             const data = await response.json();
+            console.log("imageKey", imageKey);
+
             // data should contain "risk" and "image" (base64 encoded)
+            // // Fetch: "https://sophiasharif--abatement-get-risk-endpoint.modal.run/?lat=37.43112348844268&lon=-122.21332146865818&width=100&height=100&year=2016"
+            // const BASE_URL =
+            //     "https://sophiasharif--abatement-with-upload-get-risk-endpoint.modal.run";
+            // const MIRROR_URL =
+            //     "https://1245-131-239-15-54.ngrok-free.app/mirror";
+            // const imageKey = uuidv4();
+            // const url = `${MIRROR_URL}/?lat=${lat}&lon=${lon}&width=${size}&height=${size}&year=${year}&key=${imageKey}&url=${encodeURIComponent(BASE_URL)}`;
+
+            // const response = await fetch(url, {
+            //     method: "GET",
+            //     headers: {
+            //         "ngrok-skip-browser-warning": "69420",
+            //         "ngrok-skip": "69420",
+            //         "ngrok-override": "69420",
+            //         "ngrok-override-host-header": "69420",
+            //     },
+            // });
+            // const data = await response.json();
+            // // data should contain "risk" and "image" (base64 encoded)
 
             console.log(data);
             //
+
+            navigate({
+                pathname: "/",
+                search: createSearchParams({
+                    score: "y2016s" + data.risk,
+                    image: imageKey + ".jpg",
+                    lat: lat + "",
+                    lon: lon + "",
+                    width: size + "",
+                    height: size + "",
+                    email: "anonymous",
+                    address: "Unknown Address",
+                }).toString(),
+            });
         } catch (e) {
             console.error(e);
         }
@@ -80,6 +87,11 @@ const LookupPage = () => {
 
     return (
         <div className="relative flex h-screen w-screen flex-col items-center justify-center gap-4">
+            <div className="flex w-[30rem] flex-row justify-center gap-4">
+                <LoadingIndicator width={50} color="red" delay={0} />
+                <LoadingIndicator width={50} color="orange" delay={0.2} />
+                <LoadingIndicator width={50} color="green" delay={0.4} />
+            </div>
             <h1 className="text-4xl font-bold">Enter Coordinates</h1>
             <input
                 type="text"

@@ -3,14 +3,16 @@ import { motion } from "framer-motion";
 
 interface Props {
     width: number;
+    color?: string;
+    delay?: number;
 }
 
-const LoadingIndicator = ({ width }: Props) => {
+const LoadingIndicator = ({ width, color = "#ef4444", delay = 0 }: Props) => {
     const ANIMATION_CONFIG = {
         backgroundColor: [
-            chroma("#ef4444").alpha(0.1).hex(),
-            chroma("#ef4444").alpha(0.2).hex(),
-            chroma("#ef4444").alpha(0.1).hex(),
+            chroma(color).alpha(0.2).hex(),
+            chroma(color).alpha(0.3).hex(),
+            chroma(color).alpha(0.2).hex(),
         ],
     };
 
@@ -33,7 +35,7 @@ const LoadingIndicator = ({ width }: Props) => {
                 animate={ANIMATION_CONFIG}
                 transition={{
                     ...TRANSITION_CONFIG,
-                    delay: 0.6,
+                    delay: 0.6 + delay,
                 }}
                 className="absolute h-full w-full rounded-full bg-red-500 bg-opacity-10"
             >
@@ -45,7 +47,7 @@ const LoadingIndicator = ({ width }: Props) => {
                     animate={ANIMATION_CONFIG}
                     transition={{
                         ...TRANSITION_CONFIG,
-                        delay: 0.3,
+                        delay: 0.3 + delay,
                     }}
                     className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-red-500 bg-opacity-10"
                 >
@@ -57,7 +59,7 @@ const LoadingIndicator = ({ width }: Props) => {
                         animate={ANIMATION_CONFIG}
                         transition={{
                             ...TRANSITION_CONFIG,
-                            delay: 0.3,
+                            delay: 0 + delay,
                         }}
                         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-red-500 bg-opacity-10"
                     ></motion.div>
