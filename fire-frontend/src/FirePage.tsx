@@ -1,31 +1,61 @@
 import chroma from "chroma-js";
 import { motion } from "framer-motion";
-import { FaCircleInfo, FaFire, FaHouseFire, FaTruck } from "react-icons/fa6";
+import { FaCircleInfo, FaFire, FaHouseFire } from "react-icons/fa6";
 import { useSearchParams } from "react-router-dom";
 
 const RiskCopy = {
-    0: "Your property is in a safe zone and does not pose a fire risk. Keep up the good work!",
-    0.25: "Your property is in a low-risk zone and meets basic fire safety requirements. Consider additional precautions to reduce fire risk.",
-    0.5: "Your property is in a moderate-risk zone and may require additional fire safety measures. Take steps to reduce fire risk and protect your home.",
+    0: "Your property is well maintained and does not pose a fire risk. Keep up the good work!",
+    0.25: "Your property low-risk and meets basic fire safety requirements. Consider additional precautions to reduce fire risk.",
+    0.5: "Your property is a moderate-risk for spreading fire and may require additional fire safety measures. Take steps to reduce fire risk and protect your home.",
     0.75: "Your property has been identified as a potential fire code violation due to overgrown vegetation and insufficient defensible space around the home. These conditions increase the risk of fire spreading and do not comply with current fire safety regulations. Please address these issues by clearing brush and ensuring proper spacing between structures to avoid further action.",
 };
 
+function parseScore(score: string) {
+    // y2022s0.1y2020s0.2 and so on
+    const scoreMap: Record<string, number> = {};
+    const scores = score.split("y");
+    scores.forEach((s) => {
+        const [year, value] = s.split("s");
+        scoreMap[parseInt(year)] = parseFloat(value);
+    });
+    return scoreMap;
+}
+
+function getOrderedScores(scoreMap: Record<string, number>) {
+    return Object.keys(scoreMap)
+        .sort()
+        .map((year) => scoreMap[year]);
+}
+
+function roundToFivePlaces(num: number) {
+    return Math.round(num * 100000) / 100000;
+}
+
 const FirePage = () => {
-    let [searchParams, setSearchParams] = useSearchParams();
+    let [searchParams] = useSearchParams();
 
     // extract lat, lon, width, height from searchParams
-    const lat = searchParams.get("lat") || "40.7128";
-    const lon = searchParams.get("lon") || "-74.0060";
+    const lat = roundToFivePlaces(
+        parseFloat(searchParams.get("lat") || "40.7128"),
+    );
+    const lon = roundToFivePlaces(
+        parseFloat(searchParams.get("lon") || "-74.0060"),
+    );
     const width = searchParams.get("width") || "100";
     const height = searchParams.get("height") || "100";
+    const image = searchParams.get("image") || "";
+    const score = searchParams.get("score") || "y2016s0.7";
+    const scoreMap = parseScore(score);
+    const recentScore = getOrderedScores(scoreMap)[0];
+    const email = searchParams.get("email") || "sophia.sharif@gmail.com";
+    const address =
+        searchParams.get("address") ||
+        "1234 Example Street, San Francisco, CA 94105";
 
-    const score = 0.75;
-    const email = "sophia.sharif@gmail.com";
-    const addressLine1 = "1234 Elm St";
-    const addressLine2 = "Springfield, IL 62701";
+    console.log(lat, lon, width, height, score, email);
 
     const scale = chroma.scale(["green", "orange", "red"]);
-    const bgColor = (a: number) => scale(score).alpha(a).hex();
+    const bgColor = (a: number) => scale(recentScore).alpha(a).hex();
 
     const ANIMATION_CONFIG = {
         backgroundColor: [bgColor(0.1), bgColor(0.2), bgColor(0.1)],
@@ -56,15 +86,22 @@ const FirePage = () => {
     return (
         <div className="flex h-screen w-screen flex-row">
             <div className="flex h-full flex-1 flex-col gap-4 p-[6vh]">
-                <h1 className="text-4xl font-bold text-gray-900">
-                    {email}
+                <h1 className="text-xl text-gray-400">For {email}</h1>
+                <h1 className="mt-4 text-4xl font-bold text-gray-900">
+                    {/* {email} */}
+                    {address}
                     {/* {addressLine1} */}
                     {/* <br />
                     {addressLine2} */}
                 </h1>
-                <h1 className="-mt-2 text-xl text-gray-400">
-                    {lat}, {lon}
-                </h1>
+                <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`}
+                    target="_blank"
+                >
+                    <h1 className="-mt-2 text-xl text-gray-400 hover:underline">
+                        {lat}, {lon}
+                    </h1>
+                </a>
 
                 <h2 className="mt-4 text-2xl font-bold text-gray-600">
                     Risk Report
@@ -77,7 +114,7 @@ const FirePage = () => {
                     }}
                 >
                     <h2 className="text-lg font-bold text-gray-700">
-                        🔥 Risk Level ~ {Math.floor(score * 100)}%
+                        🔥 Risk Level ~ {Math.floor(recentScore * 100)}%
                     </h2>
 
                     <div
@@ -93,7 +130,7 @@ const FirePage = () => {
                                 width: 0,
                             }}
                             animate={{
-                                width: `${score * 90 + 10}%`,
+                                width: `${recentScore * 90 + 10}%`,
                             }}
                             transition={{
                                 delay: 0.5,
@@ -102,7 +139,7 @@ const FirePage = () => {
                     </div>
                 </div>
 
-                <p className="text-lg text-gray-700">{getCopy(score)}</p>
+                <p className="text-lg text-gray-700">{getCopy(recentScore)}</p>
 
                 {/* Resources */}
                 <h2 className="mt-4 text-2xl font-bold text-gray-600">
@@ -178,7 +215,11 @@ const FirePage = () => {
                             >
                                 <img
                                     className="h-full w-full rounded-full"
-                                    src="https://storage.googleapis.com/support-forums-api/attachment/message-13353878-5028426867080247630.png"
+                                    src={
+                                        image
+                                            ? `https://firebasestorage.googleapis.com/v0/b/contest-submissions-575ab.appspot.com/o/fairefighter%2F${image}?alt=media`
+                                            : "https://media.mkpcdn.com/prod/1000x/c7f6de01913f4321df173a0f4e82b8ba_119773.jpg"
+                                    }
                                 />
                             </motion.div>
                         </motion.div>
