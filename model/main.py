@@ -2,7 +2,7 @@ import modal
 from fastapi import Request
 
 
-app = modal.App("example-get-started")
+app = modal.App("abatement")
 vol = modal.Volume.from_name("data")
 
 # @app.function(volumes={"/my_vol": modal.Volume.from_name("data")})                                                      
@@ -70,5 +70,4 @@ async def classify_image(request: Request):
 @app.local_entrypoint()
 def main():
     create_model.remote()
-    print("the square is", square.remote(42))
 

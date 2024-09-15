@@ -1,3 +1,6 @@
 sophia-test/env/*
 env
 gather-training-data/cache/*
+images
+model/data
+model/testing
