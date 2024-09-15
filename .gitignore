@@ -4,3 +4,4 @@ gather-training-data/cache/*
 images
 model/data
 model/testing
+fire-frontend/node_modules/*
