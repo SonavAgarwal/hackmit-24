@@ -16,8 +16,8 @@ def distance(coord1, coord2):
     lon2, lat2 = coord2
     # lat1, lon1 = coord1
     # lat2, lon2 = coord2
-    dx = (lon1 - lon2) * meters_per_long_degree((lat1 + lat2) / 2)
-    dy = (lat1 - lat2) * METERS_PER_LAT_DEGREE
+    dx = (lon2 - lon1) * meters_per_long_degree((lat1 + lat2) / 2)
+    dy = (lat2-lat1) * METERS_PER_LAT_DEGREE
     return (dx, dy)
 
 def bounding_box_to_pixel_coords(bounding_box):
@@ -31,6 +31,14 @@ def bounding_box_to_pixel_coords(bounding_box):
         coords.append((int(x), int(y)))
 
     return coords
+
+def reflect_polygon(coords):
+    # reflect polygon over first coordinate
+    x0, y0 = coords[0]
+    reflected_coords = []
+    for x, y in coords:
+        reflected_coords.append((2*x0 - x, y))
+    return reflected_coords
 
 def calculate_centroid(coords):
     # Average of the x and y coordinates of the polygon vertices
@@ -61,6 +69,7 @@ def get_polygons_from_bounding_box(bounding_box):
     res = []
     bounding_box = bounding_box[:-1] if bounding_box[0] == bounding_box[-1] else bounding_box
     polygon_coords = bounding_box_to_pixel_coords(bounding_box)
+    polygon_coords = reflect_polygon(polygon_coords)
     res.append(polygon_coords)
     for zone in ZONES_IN_METERS:
         scaled_polygon_coords = scale_polygon(polygon_coords, zone)
