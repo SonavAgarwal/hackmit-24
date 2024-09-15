@@ -3,7 +3,7 @@ from fastapi import Request
 
 
 app = modal.App("abatement")
-vol = modal.Volume.from_name("data")        
+vol = modal.Volume.from_name("data") 
 
 @app.function(volumes={"/data": vol}, image=modal.Image.debian_slim().pip_install("keras==2.12.0", "tensorflow==2.12.0")) 
 def train_model():
