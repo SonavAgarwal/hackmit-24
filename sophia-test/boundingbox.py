@@ -71,24 +71,15 @@ def get_polygons_from_bounding_box(bounding_box):
 
 IMAGE_NAME = "50x50.png"
 bounding_box = [[-120.1060273,38.8073838],[-120.1059951,38.8072709],[-120.1058791,38.807291],[-120.1059113,38.8074039]]
-polygon_coords = bounding_box_to_pixel_coords(bounding_box)
-scaled_polygon_coords = scale_polygon(polygon_coords, 100)
 
 polygons = get_polygons_from_bounding_box(bounding_box)
-
-print("polygon_coords: ", polygon_coords)
-print("centroid: ", calculate_centroid(polygon_coords))
-print("scaled: ", scaled_polygon_coords)
-
 
 # Load the image
 image = Image.open(IMAGE_NAME)  # Replace with your image file path
 draw = ImageDraw.Draw(image)
 
-# Draw the polygon on the image
-# draw.polygon(polygon_coords, outline='red', fill=None)  # Change 'red' to any color you want
-# draw.polygon(scaled_polygon_coords, outline='blue', fill=None)  # Change 'red' to any color you want
 
+# Draw the polygon on the image
 for polygon in polygons:   
     draw.polygon(polygon, outline='red', fill=None)  # Change 'red' to any color you want
 
