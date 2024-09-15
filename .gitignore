@@ -1,3 +1,4 @@
 sophia-test/env/*
 env
 gather-training-data/cache/*
+fire-frontend/node_modules/*

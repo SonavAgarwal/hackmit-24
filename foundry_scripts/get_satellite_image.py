@@ -75,3 +75,17 @@ def get_base64_at(lat, lon, width, height):
 
     # Get the base64-encoded image data from the URL
     return get_base64_from_url(url)
+
+
+def save_base64_image(base64_image, filename):
+    with open(filename, "wb") as file:
+        file.write(base64.b64decode(base64_image))
+
+
+lat, lon = 37.363032771776, -122.09416642062958
+width, height = 100, 100
+
+base64_image = get_base64_at(lat, lon, width, height)
+if base64_image:
+    save_base64_image(base64_image, "satellite_image_2.jpg")
+    print("Image saved successfully!")
