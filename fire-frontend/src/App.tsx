@@ -1,11 +1,16 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
+import FirePage from "./FirePage";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <FirePage />,
+  },
+]);
 
 function App() {
-  return (
-    <>
-      <div>Hello world</div>
-    </>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
