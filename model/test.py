@@ -4,9 +4,6 @@ import requests
 import pyproj
 
 
-
-
-
 def get_base64_from_url(url):
     response = requests.get(url)
     if response.status_code == 200:
@@ -84,12 +81,10 @@ def save_base64_image(base64_image, filename):
         file.write(base64.b64decode(base64_image))
 
 def classify_image(base64_image):
-    print('importing')
     from keras.models import load_model
     from PIL import Image
     import numpy as np
     import io
-    print('imported')
 
     # Decode the Base64 image
     image_data = base64.b64decode(base64_image)
@@ -115,23 +110,21 @@ def classify_image(base64_image):
     predictions = model.predict(img_array)
     output = float(predictions[0][0])  # Get the scalar prediction value
 
-    # Decide the class based on a threshold (e.g., 0.5)
-    result = "Fire risk" if output >= 0.5 else "No fire risk"
-
-    return {"result": result, "output": output}
+    return output
 
     
-
+def get_risk(lat, lon, width, height):
+    base64_image = get_base64_at(lat, lon, width, height)
+    if base64_image:
+        classification = classify_image(base64_image)
+        return classification
+    return None
 
 lat, lon = 34.11760766312682, -116.34170919812922
 # lat, lon = 34.08159234654308, -118.45297153569479
 width, height = 100, 100
 
-base64_image = get_base64_at(lat, lon, width, height)
-if base64_image:
-    save_base64_image(base64_image, "satellite_image.jpg")
-    print("Image saved successfully!")
-    classification = classify_image(base64_image)
-    print(classification)
+risk = get_risk(lat, lon, width, height)
+print(risk)
 
 
