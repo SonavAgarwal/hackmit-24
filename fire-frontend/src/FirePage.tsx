@@ -1,5 +1,6 @@
 import chroma from "chroma-js";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { FaCircleInfo, FaFire, FaHouseFire } from "react-icons/fa6";
 import { useSearchParams } from "react-router-dom";
 
@@ -49,7 +50,7 @@ const FirePage = () => {
     const scoreMap = parseScore(score);
     const recentScore = getOrderedScores(scoreMap)[0];
     const email = searchParams.get("email") || "anonymous";
-    const address = searchParams.get("address") || "Unknown Address";
+    // const address = searchParams.get("address") || "Unknown Address";
     const llm = searchParams.get("llm") || "";
     console.log(llm);
 
@@ -61,6 +62,19 @@ const FirePage = () => {
 
     const scale = chroma.scale(["green", "orange", "red"]);
     const bgColor = (a: number) => scale(recentScore).alpha(a).hex();
+
+    const [addressDisplay, setAddress] = useState("Unknown Address");
+    useEffect(() => {
+        async function ga() {
+            try {
+                const address = await getAddress(lon, lat);
+                setAddress(address);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        ga();
+    }, [lat, lon]);
 
     const ANIMATION_CONFIG = {
         backgroundColor: [bgColor(0.1), bgColor(0.2), bgColor(0.1)],
@@ -92,7 +106,7 @@ const FirePage = () => {
                 <h1 className="text-xl text-gray-400">For {email}</h1>
                 <h1 className="mt-4 text-4xl font-bold text-gray-900">
                     {/* {email} */}
-                    {address}
+                    {addressDisplay}
                     {/* {addressLine1} */}
                     {/* <br />
                     {addressLine2} */}
@@ -241,3 +255,13 @@ const FirePage = () => {
 };
 
 export default FirePage;
+
+async function getAddress(lon: number, lat: number): Promise<string> {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${import.meta.env.VITE_APP_GOOGLE_API_KEY}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+    const address = data.results[0].formatted_address;
+
+    return address;
+}

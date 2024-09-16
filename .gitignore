@@ -5,3 +5,4 @@ images
 model/data
 model/testing
 fire-frontend/node_modules/*
+fire-frontend/.env
